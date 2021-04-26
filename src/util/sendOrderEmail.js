@@ -7,7 +7,7 @@ import Logger from "@reactioncommerce/logger";
  * @param {String} [action] - The action triggering the email
  * @returns {Boolean} True if sent; else false
  */
-export default async function sendOrderEmail(context, order, action) {
+export default async function sendOrderEmail(context, order, action, after, templateName) {
   // anonymous account orders without emails.
   const to = order.email;
   if (!to) {
@@ -22,6 +22,7 @@ export default async function sendOrderEmail(context, order, action) {
     Object.assign(dataForEmail, someData);
   }
 
+  // TODO Discount in email
   const language = await getLanguageForOrder(context, order);
 
   await context.mutations.sendOrderEmail(context, {
@@ -29,7 +30,9 @@ export default async function sendOrderEmail(context, order, action) {
     dataForEmail,
     fromShop: dataForEmail.shop,
     language,
-    to
+    to,
+    after,
+    templateName,
   });
 
   return true;
@@ -53,3 +56,4 @@ async function getLanguageForOrder(context, { ordererPreferredLanguage, accountI
   const account = await Accounts.findOne({ _id: accountId }, { "profile.language": 1 });
   return (account && account.profile && account.profile.language) || ordererPreferredLanguage;
 }
+

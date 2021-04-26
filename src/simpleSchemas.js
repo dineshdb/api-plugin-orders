@@ -254,6 +254,52 @@ export const CommonOrderItem = new SimpleSchema({
   },
   "title": String,
   "variantId": String,
+  deliveryUrgency: {
+    type: String,
+    optional: true,
+  },
+  "preferredDeliveryDate": {
+    type: Date,
+    optional: true,
+  },
+  "deliveryDate": {
+    type: Date,
+    optional: true,
+  },
+  "imageRequested": {
+    type: Boolean,
+    optional: true
+  },
+  videoRequested: {
+    type: Boolean,
+    optional: true
+  },
+  "requestedImageUrls": {
+    type: Array,
+    optional: true
+  },
+  "requestedImageUrls.$": String,
+  "requestedVideoUrls": {
+    type: Array,
+    optional: true
+  },
+  "requestedVideoUrls.$": String,
+  "message": {
+    type: String,
+    optional: true,
+  },
+  "messageOnItem": {
+    type: String,
+    optional: true,
+  },
+  fulfillmentManager: {
+    type: String,
+    optional: true,
+  },
+  deliveryRepresentative: {
+    type: String,
+    optional: true,
+  },
   "variantTitle": {
     type: String,
     optional: true
@@ -431,6 +477,40 @@ export const orderInputSchema = new SimpleSchema({
   "ordererPreferredLanguage": {
     type: String,
     optional: true
+  },
+  "imageRequested": {
+    type: Boolean,
+    optional: true
+  },
+  videoRequested: {
+    type: Boolean,
+    optional: true
+  },
+  "requestedImageUrls": {
+    type: Array,
+    optional: true
+  },
+  "requestedImageUrls.$": String,
+  "requestedVideoUrls": {
+    type: Array,
+    optional: true
+  },
+  "requestedVideoUrls.$": String,
+  message: {
+    type: String,
+    optional: true,
+  },
+  messageOnItem: {
+    type: String,
+    optional: true,
+  },
+  deliveryUrgency: {
+    type: String,
+    optional: true,
+  },
+  preferredDeliveryDate: {
+    type: Date,
+    optional: true,
   },
   "shopId": String
 });
@@ -650,6 +730,29 @@ const OrderItemAttribute = new SimpleSchema({
   }
 });
 
+const ImageSizes = new SimpleSchema({
+  large: {
+    type: String,
+    optional: true,
+  },
+  medium: {
+    type: String,
+    optional: true,
+  },
+  original: {
+    type: String,
+    optional: true,
+  },
+  small: {
+    type: String,
+    optional: true,
+  },
+  thumbnail: {
+    type: String,
+    optional: true,
+  },
+});
+
 /**
  * @name OrderItem
  * @memberof Schemas
@@ -741,8 +844,16 @@ export const OrderItem = new SimpleSchema({
     type: SimpleSchema.Integer,
     min: 0
   },
+  description: {
+    type: String,
+    optional: true
+  },
   "shopId": String,
   "subtotal": Number,
+  "imageURLs": {
+    type: ImageSizes,
+    optional: true,
+  },
   "title": String,
   "updatedAt": Date,
   "variantId": {
@@ -752,6 +863,16 @@ export const OrderItem = new SimpleSchema({
   "variantTitle": {
     type: String,
     optional: true
+  },
+  picked: {
+    type: Boolean,
+    optional: true,
+    defaultValue: false
+  },
+  packed: {
+    type: Boolean,
+    optional: true,
+    defaultValue: false
   },
   "workflow": {
     type: Workflow,
@@ -985,6 +1106,67 @@ export const Payment = new SimpleSchema({
   }
 });
 
+// export const ExceptionNote = new SimpleSchema({
+//   account: {
+//     type: String,
+//     optional: true,
+//   },
+//   content: {
+//     type: String,
+//     optional: true,
+//   },
+//   createdAt: {
+//     type: Date,
+//     optional: true,
+//   },
+// })
+
+export const fulfillmentChecklist = new SimpleSchema({
+  name: {
+    type: String,
+    optional: true
+  },
+  key: {
+    type: String,
+    optional: true
+  },
+  state: {
+    type: Boolean,
+    defaultValue: false,
+    optional: true
+  }
+})
+
+export const location = new SimpleSchema({
+  userId: {
+    type: String,
+    optional: true
+  },
+  name: {
+    type: String,
+    optional: true
+  },
+  latitude: {
+    type: String,
+    optional: true
+  },
+  longitude: {
+    type: String,
+    optional: true
+  },
+  altitude: {
+    type: String,
+    optional: true
+  },
+  createdAt: {
+    type: Date,
+    optional: true
+  },
+  updatedAt: {
+    type: Date,
+    optional: true
+  }
+})
 /**
  * @name Order Schema
  * @memberof Schemas
@@ -1110,6 +1292,79 @@ export const Order = new SimpleSchema({
     type: Date,
     optional: true
   },
+  "imageURLs": {
+    type: ImageSizes,
+    optional: true,
+  },
+  deliveryUrgency: {
+    type: String,
+    optional: true,
+  },
+  "preferredDeliveryDate": {
+    type: Date,
+    optional: true,
+  },
+  "deliveryDate": {
+    type: Date,
+    optional: true,
+  },
+  "imageRequested": {
+    type: Boolean,
+    optional: true
+  },
+  videoRequested: {
+    type: Boolean,
+    optional: true
+  },
+  "requestedImageUrls": {
+    type: Array,
+    optional: true
+  },
+  "requestedImageUrls.$": String,
+  "requestedVideoUrls": {
+    type: Array,
+    optional: true
+  },
+  "requestedVideoUrls.$": String,
+  signatureUrl: {
+    type: String,
+    optional: true
+  },
+  signedLocation: {
+    type: location,
+    optional: true
+  },
+  alternativePhone:{
+    type:String,
+    optional:true,
+    label:"Order's alternative phone number."
+  },
+  "message": {
+    type: String,
+    optional: true,
+  },
+  "messageOnItem": {
+    type: String,
+    optional: true,
+  },
+  fulfillmentManager: {
+    type: String,
+    optional: true,
+  },
+  deliveryRepresentative: {
+    type: String,
+    optional: true,
+  },
+  exceptionNotes: {
+    type: Array,
+    optional: true
+  },
+  fulfillmentChecklist: {
+    type: Array,
+    optional: true
+  },
+  "fulfillmentChecklist.$": fulfillmentChecklist,
+  "exceptionNotes.$": Notes,
   "workflow": {
     type: Workflow,
     optional: true,

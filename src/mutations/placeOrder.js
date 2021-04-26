@@ -124,6 +124,14 @@ export default async function placeOrder(context, input) {
     email,
     fulfillmentGroups,
     ordererPreferredLanguage,
+    preferredDeliveryDate,
+    deliveryUrgency,
+    message,
+    messageOnItem,
+    imageRequested,
+    videoRequested,
+    requestedImageUrls,
+    requestedVideoUrls,
     shopId
   } = orderInput;
   const { accountId, appEvents, collections, getFunctionsOfType, userId } = context;
@@ -154,6 +162,18 @@ export default async function placeOrder(context, input) {
     const discountsResult = await context.queries.getDiscountsTotalForCart(context, cart);
     ({ discounts } = discountsResult);
     discountTotal = discountsResult.total;
+
+    // Convert values into exchanged prices.
+    const exchangeRate = context.queries.getForexFor && context.queries.getForexFor(currencyCode);
+    if(exchangeRate) {
+      discounts = discounts && discounts.map(d => {
+        return {
+        ...d,
+        amount: d.amount * exchangeRate,
+        }
+      });
+      discountTotal = discountsResult.total * exchangeRate;
+    }
   }
 
   // Create array for surcharges to apply to order, if applicable
@@ -226,6 +246,14 @@ export default async function placeOrder(context, input) {
     surcharges: orderSurcharges,
     totalItemQuantity: finalFulfillmentGroups.reduce((sum, group) => sum + group.totalItemQuantity, 0),
     updatedAt: now,
+    preferredDeliveryDate,
+    deliveryUrgency,
+    message,
+    messageOnItem,
+    imageRequested,
+    videoRequested,
+    requestedImageUrls,
+    requestedVideoUrls,
     workflow: {
       status: "new",
       workflow: ["new"]
