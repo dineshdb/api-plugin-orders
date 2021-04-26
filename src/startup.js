@@ -21,8 +21,19 @@ export default async function ordersStartup(context) {
     "afterOrderCreate",
     ({ order }) => sendEmail(context, order),
   );
-  appEvents.on("afterOrderUpdate", ({ order }) => updated(context, order));
-  appEvents.on("afterOrderCancel", ({ order }) => sendOrderEmail(context, order, 'canceled'));
+  registerEvent("afterOrderUpdate", ({ order }) => updated(context, order));
+  registerEvent("afterOrderCancel", ({ order }) => sendOrderEmail(context, order, 'canceled'));
+  registerEvent("afterExceptionRegistered", ({ order }) => sendExceptionEmail(context, order))
+
+  function registerEvent(event, cb) {
+    appEvents.on(event, cb)
+  }
+}
+
+function sendExceptionEmail(context, order){
+  if (support_email) {
+    sendOrderEmail(context, Object.assign({}, order, { email: support_email }), "new-exception");
+  }
 }
 
 function sendEmail(context, order) {

@@ -62,6 +62,8 @@ function getTemplateName(action, dataForEmail) {
     return "orders/completed";
   } else if (action === "new-admin") {
     return "orders/new-admin";
+  } else if (action === "new-exception") {
+    return "orders/new-exception";
   } else if (action === "canceled") {
     return"orders/canceled";
   } else {
