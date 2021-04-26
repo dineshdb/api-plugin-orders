@@ -187,6 +187,19 @@ extend type Mutation {
     "Mutation input"
     input: UpdateOrderFulfillmentGroupInput!
   ): UpdateOrderFulfillmentGroupPayload!
+
+  "Use this mutation to assign an order to a fulfillment manager."
+  assignOrderToFulfillmentManager(
+    "Mutation input"
+    input: AssignOrderToAccountInput!
+  ): AssignOrderToAccountPayload!
+
+  "Use this mutation to assign an order to a delivery representative."
+  assignOrderToDeliveryRepresentative(
+    "Mutation input"
+    input: AssignOrderToAccountInput!
+  ): AssignOrderToAccountPayload!
+
 }
 
 "Allowed values for the `OrderFulfillmentGroupItems` sortBy parameter"
@@ -214,6 +227,15 @@ enum OrdersSortByField {
 
   "Sort by the date and time when the order was placed"
   createdAt
+
+  "Sort by using delivery date."
+  deliveryDate
+
+  "Sort by using preferred delivery date."
+  preferredDeliveryDate
+
+  "Sort by using delivery urgency."
+  deliveryUrgency
 }
 
 """
@@ -433,6 +455,9 @@ type OrderItem implements Node {
   "The quantity of this item that has been added to the cart. This must be a positive integer. Remove this `CartItem` from it's associated cart if you want `0` of this item."
   quantity: Int!
 
+  "The product description"
+  description: String
+
   "The shop associated with this cart item."
   shop: Shop!
 
@@ -459,6 +484,12 @@ type OrderItem implements Node {
 
   "Delivery date selected by the system."
   deliveryDate: DateTime
+
+  "Picked state of order item."
+  picked: Boolean
+
+  "Packed state of order item."
+  packed: Boolean
 }
 
 """
@@ -572,6 +603,12 @@ type Order implements Node {
   "One or more fulfillment groups. Each of these are fulfilled and charged as separate orders."
   fulfillmentGroups: [OrderFulfillmentGroup]!
 
+  "Checklist of order process for fulfillment manager"
+  fulfillmentChecklist:[FulfillmentChecklistPayload]
+
+  "Alternative phone of user for order."
+  alternativePhone: String
+
   "Notes about the order. This will always return an array but it may be empty"
   notes: [OrderNote]!
 
@@ -614,7 +651,7 @@ type Order implements Node {
   "Delivery date selected by the system."
   deliveryDate: DateTime
 
- "The URLs for a picture of the item in various sizes"
+  "The URLs for a picture of the item in various sizes"
   imageURLs: ImageSizes
 
   "Message to be sent with the order"
@@ -622,6 +659,31 @@ type Order implements Node {
 
   "Message to be placed on item, say, birthday cake."
   messageOnItem: String
+
+  "Permission Flag to take picture while handing over the order."
+  imageRequested:Boolean
+
+  "Permission Flag to take video while handing over the order."
+  videoRequested:Boolean
+
+
+  "List of image urls."
+  requestedImageUrls:[String!]
+
+  "List of video urls."
+  requestedVideoUrls:[String!]
+
+  "Signature Image URL."
+  signatureUrl:String
+
+  "Signed location data."
+  signedLocation:LocationPayload
+
+  "Order notes for exception."
+  exceptionNotes:[OrderNote!]
+
+  fulfillmentManager:ID
+  deliveryRepresentative:ID
 }
 
 "A note about an order"
@@ -681,6 +743,7 @@ input OrderFulfillmentGroupItemInput {
 
 "Information needed by the selected fulfillment method to properly fulfill the order"
 input OrderFulfillmentGroupDataInput {
+
   "The mailing address to which this fulfillment group should be shipped"
   shippingAddress: AddressInput
 }
@@ -785,6 +848,12 @@ input OrderInput {
 
   "Message to be placed on item, say, birthday cake."
   messageOnItem: String
+
+  "Permission Flag to take picture while handing over the order."
+  imageRequested:Boolean
+
+  "Permission Flag to take video while handing over the order."
+  videoRequested:Boolean
 }
 
 "Input for adding order payments"
@@ -931,6 +1000,23 @@ input UpdateOrderInput {
 
   "Set the current order status to this"
   status: String
+
+  "Provide group for whom data is being fetch."
+  assignedTo: assignedToGroups
+
+  "Set the preferred delivery date for order."
+  preferredDeliveryDate:DateTime
+
+  "Set the alternative phone of user for order."
+  alternativePhone: String
+
+  "Set the order notes."
+  notes:[OrderNoteInput]
+
+  #  deliveryUrgency :String
+  #  requestedImageUrls:[String!]
+  #  requestedVideoUrls:[String!]
+  #  deliveryDate :DateTime
 }
 
 "Input for the updateOrderFulfillmentGroup mutation"
@@ -1085,6 +1171,10 @@ input OrderFilterInput {
   "A createdAt date range to filter by"
   createdAt: CreatedAtInput
 
+  deliveredAt: CreatedAtInput
+  preferredDeliveredAt:CreatedAtInput
+  urgencyTag: String
+
   "An order's fulfillment status"
   fulfillmentStatus: [OrderFulfillmentStatus]
 
@@ -1096,4 +1186,92 @@ input OrderFilterInput {
 
   "The order's status to filter by"
   status: OrderStatus
+}
+"Input type to assign order to fulfillmentManager"
+input AssignOrderToAccountInput{
+  "ID of shop"
+  shopId: ID!
+  "ID of the order to be assigned"
+  orderId: ID!
+  "ID of the account who is to be assigned"
+  accountId: ID!
+  "group Id"
+  groupId:String!
+}
+
+type AssignOrderToAccountPayload{
+  "ID of shop"
+  shopId: ID!
+  "ID of the order to be assigned"
+  orderId: ID!
+  "ID of the account who is assigned as fulfillment manager"
+  fulfillmentManagerId: ID
+  "ID of the account who is assigned as delivery representative"
+  deliveryRepresentativeId: ID
+}
+
+type FulfillmentChecklistPayload{
+  "Name for cheklist"
+  name: String
+
+  "Unique key for checklist"
+  key: String
+
+  "State flag for checklist"
+  state: Boolean
+}
+
+input FulfillmentChecklist{
+  "Set name for cheklist"
+  name: String
+
+  "Set unique key for checklist"
+  key: String
+
+  "Set state flag for checklist, default state is false."
+  state: Boolean
+}
+
+input OrderItemStatus{
+  "Item Id of order"
+  orderItemId: ID
+
+  "Set picked flag"
+  picked: Boolean
+
+  "Set packed flag"
+  packed: Boolean
+}
+
+input FulfillmentChecklistInput{
+  "The order Id"
+  orderId:ID!
+
+  "Set checklist input."
+  checklist: FulfillmentChecklist
+
+  "Set orderItem input"
+  orderItem: OrderItemStatus
+}
+
+input OrderNoteInput{
+  "Set the content of the note."
+  content: String
+
+  "Set flag for modified content"
+  isModified: Boolean
+}
+
+input LocationInput{
+  "Set unique name for location."
+  name: String
+
+  "Set latitude"
+  latitude: String
+
+  "Set longitude"
+  longitude: String
+
+  "Set altitude"
+  altitude: String
 }
