@@ -10,7 +10,7 @@ const noteInput = new SimpleSchema({
   isModified: {
     type: Boolean,
     optional: true,
-    defaultValue:false
+    defaultValue: false
   }
 });
 const inputSchema = new SimpleSchema({
@@ -40,13 +40,21 @@ const inputSchema = new SimpleSchema({
     type: Array,
     optional: true
   },
-  "notes.$":noteInput,
-  preferredDeliveryDate:{
-    type:Date,
-    optional:true
+  "notes.$": noteInput,
+  preferredDeliveryDate: {
+    type: Date,
+    optional: true
   },
   alternativePhone: {
     type: String,
+    optional: true
+  },
+  imageRequestedDeclined: {
+    type: Boolean,
+    optional: true
+  },
+  videoRequestedDeclined: {
+    type: Boolean,
     optional: true
   }
 });
@@ -75,6 +83,8 @@ export default async function updateOrder(context, input) {
     // requestedVideoUrls,
     notes,
     alternativePhone,
+    imageRequestedDeclined,
+    videoRequestedDeclined,
     // deliveryDate,
   } = input;
 
@@ -108,7 +118,6 @@ export default async function updateOrder(context, input) {
       if (status && status !== "coreOrderWorkflow/shipped" && status !== "coreOrderWorkflow/completed" && status !== "coreOrderWorkflow/exception") {
         throw new ReactionError("access-denied", `User cannot add ${status} status to order.`);
       }
-
       break;
 
     case "fulfillmentManager":
@@ -134,20 +143,30 @@ export default async function updateOrder(context, input) {
       if (accountId) modifier.$set.accountId = accountId;
       if (customFields) modifier.$set.customFields = customFields;
       if (alternativePhone) modifier.$set.alternativePhone = alternativePhone;
-      if (preferredDeliveryDate)
-      {
+      if (preferredDeliveryDate) {
         modifier.$set.preferredDeliveryDate = preferredDeliveryDate;
         modifier.$set.deliveryUrgency = "";
       }
   }
 
-  if (notes) modifier.$set.notes = getNotes(order.notes||[],notes,userId);
+  if (notes) modifier.$set.notes = getNotes(order.notes || [], notes, userId);
+  if (imageRequestedDeclined != null && imageRequestedDeclined !== order.imageRequestedDeclined) modifier.$set.imageRequestedDeclined = imageRequestedDeclined;
+  if (videoRequestedDeclined != null && videoRequestedDeclined !== order.videoRequestedDeclined) modifier.$set.videoRequestedDeclined = videoRequestedDeclined;
 
   if (status && order.workflow.status !== status) {
     modifier.$set["workflow.status"] = status;
     modifier.$push = {
       "workflow.workflow": status
     };
+    order.shipping.map((data,index)=>{
+      modifier.$set[`shipping.${index}.workflow.status`] = status;
+      modifier.$push = {
+        [`shipping.${index}.workflow.workflow`]: status
+      };
+      modifier.$set[`shipping.${index}.updatedAt`] = new Date();
+    })
+    modifier.$set.updatedAt = new Date();
+
   }
 
   // Skip updating if we have no updates to make
