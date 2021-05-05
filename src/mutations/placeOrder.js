@@ -130,6 +130,7 @@ export default async function placeOrder(context, input) {
     messageOnItem,
     imageRequested,
     videoRequested,
+    consentsToSMS,
     requestedImageUrls,
     requestedVideoUrls,
     shopId
@@ -252,6 +253,7 @@ export default async function placeOrder(context, input) {
     messageOnItem,
     imageRequested,
     videoRequested,
+    consentsToSMS,
     requestedImageUrls,
     requestedVideoUrls,
     workflow: {

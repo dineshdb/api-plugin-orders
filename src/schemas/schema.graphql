@@ -859,6 +859,9 @@ input OrderInput {
 
   "Permission Flag to take video while handing over the order."
   videoRequested:Boolean
+
+  "Permission flag to accept SMS updates"
+  consentsToSMS: Boolean
 }
 
 "Input for adding order payments"

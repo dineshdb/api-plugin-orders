@@ -522,6 +522,10 @@ export const orderInputSchema = new SimpleSchema({
     type: Boolean,
     optional: true
   },
+  consentsToSMS: {
+    type: Boolean,
+    optional: true,
+  },
   "requestedImageUrls": {
     type: Array,
     optional: true
@@ -1321,6 +1325,10 @@ export const Order = new SimpleSchema({
   videoRequested: {
     type: Boolean,
     optional: true
+  },
+  consentsToSMS: {
+    type: Boolean,
+    optional: true,
   },
   "requestedImageUrls": {
     type: Array,
