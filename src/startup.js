@@ -110,7 +110,6 @@ function updated(context, order, action) {
       month: "short",
       day: "2-digit"
     }
-    console.log("Formatting delivery date")
     const preferredDeliveryDate = order.preferredDeliveryDate.toLocaleDateString("en-CA", options);
     order = {
       ...order,

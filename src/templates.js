@@ -3,7 +3,10 @@ import fuzzy from "fuzzy";
 
 export const exceptionList = {
     "Receiver didn't receive the call": (order) =>
-      `We couldn't contact the receiver at ${order.receiverPhone} becasue our call wasn't answered. Please provide alternative phone at +1-775-600-1040.`,
+    `We couldn't contact the receiver at ${order.receiverPhone} becasue our call wasn't answered. Please provide alternative phone at +1-775-600-1040.`,
+       // This one is added because our android build uses slightly different words and fuzzy didn't find it. It should be essentially the same as previous one.
+    "Receiver's didn't received the call": (order) =>
+    `We couldn't contact the receiver at ${order.receiverPhone} becasue our call wasn't answered. Please provide alternative phone at +1-775-600-1040.\n- Hamro Gifts`,
     "Receiver's phone is switched off": (order) =>
       `We couldn't contact the receiver at ${order.receiverPhone} becasue the phone is switched off. Please provide alternative phone at +1-775-600-1040.`,
     "Receiver is out of valley": (_order) =>
